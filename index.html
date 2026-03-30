@@ -235,6 +235,14 @@
 </div>
 
 <script>
+    // デバイスIDの生成・取得ロジック
+    let deviceId = localStorage.getItem('quiz_device_id');
+    if (!deviceId) {
+        // ランダムなIDを生成（例: Device-abc123xyz）
+        deviceId = 'Device-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('quiz_device_id', deviceId);
+    }
+
     // クイズデータ (全66問)
     const quizData = [
         { image: "img1.png", answer: "クロス" },
@@ -306,8 +314,8 @@
     ];
 
     // 設定
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwDOvN_tiBNuEnEd87OuPiuU-8ohFnmDLI5jOBdQx5MaeapM9YZJkyqk0R76mwJdr41/exec"; // ユーザーが後で書き換える
-    const IMAGE_PATH = "imgs/"; // 画像が格納されているフォルダ
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzDz7wPahKaIF4eENPIMsbZDKLcUS6pmPoUgog_aZsVNowsDG0-OMRBZkwuczvOZQCc/exec"; 
+    const IMAGE_PATH = "imgs/"; 
     const QUESTIONS_TO_SHOW = 10; // 出題数
 
     let currentQuestions = [];
@@ -444,7 +452,8 @@
     async function sendToGAS(score, total) {
         const msg = document.getElementById('sending-msg');
         
-        if (GAS_URL === "GASのURLをここに記載" || !GAS_URL.startsWith("http")) {
+        // URLの入力ミスや未設定をチェック
+        if (GAS_URL.includes("ここに記載") || GAS_URL.length < 10) {
             msg.textContent = "※GASのURLが設定されていないため、送信をスキップしました。";
             return;
         }
@@ -465,6 +474,7 @@
                 body: JSON.stringify({
                     correct: score,
                     total: total,
+                    deviceId: deviceId, // デバイスIDを送信
                     timestamp: new Date().toISOString()
                 }),
                 signal: controller.signal
